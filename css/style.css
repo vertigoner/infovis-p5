@@ -9,3 +9,10 @@
 svg {
     /* background-color: blue; */
 }
+
+text {
+    font-family: sans-serif;
+    alignment-baseline: middle;
+    text-anchor: middle;
+    color:green ;
+}

@@ -6,8 +6,8 @@
 * Noah Roberts
 */
 
-var width = 500;
-var height = 500;
+var width = 700;
+var height = 700;
 var diameter = 250;
 
 window.onload = start;
@@ -34,6 +34,8 @@ function start() {
     //     .value(function(d) {
     //         return d.size;
     //     })
+
+    //var simulation = d3.forceSimulation();
 
     d3.csv("./data/candy.csv", function(error, data) {
         if (error) {
@@ -69,13 +71,47 @@ function start() {
             }
         });
 
-        
-        chart1.selectAll('circle')
-        //     .data(data)
-        //     .enter()
-        //     .append('circle')
-        //     .attr()
+        //console.log(candyMap);
 
+        //create chart1 
+
+        let candyMapArray = candyMap.entries();
+        console.log(candyMapArray[1].key);
+
+        force = d3.layout.force() //set up force
+            .size([width, height])
+            .nodes(candyMapArray)
+            .charge(-200)
+            .start();
+
+        var drag = force.drag();
+
+        var radiusScale = d3.scale.linear()
+            .domain([1, 2600])
+            .range([1, 40]);
+
+        chart1.selectAll("circle")
+             .data(candyMapArray)
+             .enter().append("circle")
+             .call(drag)
+             .attr("class", "candy")
+             .attr("r", function(d) {
+                return radiusScale(d.value[0]);
+             })
+             .attr("fill", "red")
+             .append("text").text(function(d) { return "TEST"; });
+
+        force.on("tick", tick);
+
+        function tick() {
+        chart1.selectAll("circle")
+            .attr("cx", function(d) {
+                return d.x;
+            }) 
+             .attr("cy", function(d) {
+                return d.y;
+            });        
+        }
 
         // var scaleRadius = d3.scaleLinear()
         //     .domain([d3.min(data, function(d) { return +d.views; }), 
@@ -85,6 +121,7 @@ function start() {
         // var bubbleChart = bubbleChart();
         // chart1.data(data).call(bubbleChart);
     });
+
 }
 
 // function bubbleChart() {
