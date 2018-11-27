@@ -45,7 +45,7 @@ function start() {
 
         for (let col of Object.keys(data[0])) {
             if (/^Q6_/.test(col)) {
-                candyMap.set(col.substring(3), 0);
+                candyMap.set(col.substring(3), new Array(4).fill(0));
             }
         }
 
@@ -53,21 +53,24 @@ function start() {
             for (let col of Object.keys(d)) {
                 if (/^Q6_/.test(col)) {
                     let key = col.substring(3);
-                    let val = candyMap.get(key);
-
+                    var array = candyMap.get(key);
                     if (d[col] === "JOY") {
-                        val += 2;
+                        array[0] += 2;
+                        array[1] += 1;
                     } else if (d[col] === "MEH") {
-                        val += 1;
+                        array[0] += 1;
+                        array[2] += 1;
+                    } else if (d[col] === "DESPAIR") {
+                        array[3] += 1;
                     }
 
-                    candyMap.set(key, val);
+                    candyMap.set(key, array);
                 }
             }
         });
-        console.log(candyMap);
+
         
-        // chart1.selectAll('circle')
+        chart1.selectAll('circle')
         //     .data(data)
         //     .enter()
         //     .append('circle')
