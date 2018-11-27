@@ -1,0 +1,11 @@
+#wrapper1 {
+    display: flex;
+}
+
+.chart {
+    padding: 5px 5px;
+}
+
+svg {
+    /* background-color: blue; */
+}
