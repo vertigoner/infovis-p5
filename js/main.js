@@ -9,33 +9,31 @@
 var width = 700;
 var height = 700;
 var diameter = 250;
+var colorRamp = ["db4242", "b76a40", "93923e", "6eba3c", "4ae23a"];
+
+function CandyEntry(joy, meh, despair) {
+    this.joy = joy;
+    this.meh = meh;
+    this.despair = despair;
+}
 
 window.onload = start;
 
 function start() {
     var chart1 = d3.select("#bubblechart")
                         .append("svg:svg")
-                        .attr("width",width)
-                        .attr("height",height);
+                        .attr("width", width)
+                        .attr("height", height);
 
     var chart2 = d3.select("#details")
                     .append("svg:svg")
-                    .attr("width",width)
-                    .attr("height",height);
+                    .attr("width", width)
+                    .attr("height", height);
 
     var chart3 = d3.select("#map")
                     .append("svg:svg")
-                    .attr("width",width * 2)
-                    .attr("height",height);
-
-    // var bubble = d3.layout.pack()
-    //     .size([diameter, diameter])
-    //     .padding(3)
-    //     .value(function(d) {
-    //         return d.size;
-    //     })
-
-    //var simulation = d3.forceSimulation();
+                    .attr("width", width * 2)
+                    .attr("height", height);
 
     d3.csv("./data/candy.csv", function(error, data) {
         if (error) {
@@ -47,7 +45,7 @@ function start() {
 
         for (let col of Object.keys(data[0])) {
             if (/^Q6_/.test(col)) {
-                candyMap.set(col.substring(3), new Array(4).fill(0));
+                candyMap.set(col.substring(3), new CandyEntry(0, 0, 0));
             }
         }
 
@@ -55,28 +53,22 @@ function start() {
             for (let col of Object.keys(d)) {
                 if (/^Q6_/.test(col)) {
                     let key = col.substring(3);
-                    var array = candyMap.get(key);
+                    let candyEntry = candyMap.get(key);
                     if (d[col] === "JOY") {
-                        array[0] += 2;
-                        array[1] += 1;
+                        candyEntry.joy++;
                     } else if (d[col] === "MEH") {
-                        array[0] += 1;
-                        array[2] += 1;
+                        candyEntry.meh++;
                     } else if (d[col] === "DESPAIR") {
-                        array[3] += 1;
+                        candyEntry.despair++;
                     }
-
-                    candyMap.set(key, array);
+                    candyMap.set(key, candyEntry);
                 }
             }
         });
 
-        //console.log(candyMap);
-
         //create chart1 
 
         let candyMapArray = candyMap.entries();
-        console.log(candyMapArray[1].key);
 
         force = d3.layout.force() //set up force
             .size([width, height])
@@ -96,9 +88,11 @@ function start() {
              .call(drag)
              .attr("class", "candy")
              .attr("r", function(d) {
-                return radiusScale(d.value[0]);
+                return radiusScale(d.value.joy * 2 + d.value.meh);
              })
-             .attr("fill", "red")
+             .attr("fill", function(d) {
+                return "red";
+             })
              .append("text").text(function(d) { return "TEST"; });
 
         force.on("tick", tick);
