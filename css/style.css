@@ -12,7 +12,11 @@ svg {
 
 text {
     font-family: sans-serif;
-    alignment-baseline: middle;
     text-anchor: middle;
-    color:green ;
+    stroke: black;
+    position: relative; 
+}
+
+#candy {
+    display: hidden;
 }

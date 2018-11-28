@@ -9,7 +9,7 @@
 var width = 700;
 var height = 700;
 var diameter = 250;
-var colorRamp = ["db4242", "b76a40", "93923e", "6eba3c", "4ae23a"];
+var colorRamp = ["#db4242", "#b76a40", "#93923e", "#6eba3c", "#4ae23a"];
 
 function CandyEntry(joy, meh, despair) {
     this.joy = joy;
@@ -82,46 +82,44 @@ function start() {
             .domain([1, 2600])
             .range([1, 40]);
 
-        chart1.selectAll("circle")
-             .data(candyMapArray)
-             .enter().append("circle")
-             .call(drag)
-             .attr("class", "candy")
-             .attr("r", function(d) {
+        var colorScale = d3.scale.linear()
+            .domain([1, 2600])
+            .range([0, colorRamp.length])
+
+        var g = chart1.selectAll("g")
+            .data(candyMapArray)
+            .enter().append("g")
+            .call(drag);
+
+        g.append("circle")
+            .attr("class", "candy")
+            .attr("r", function(d) {
                 return radiusScale(d.value.joy * 2 + d.value.meh);
-             })
-             .attr("fill", function(d) {
-                return "red";
-             })
-             .append("text").text(function(d) { return "TEST"; });
+            })
+            .attr("fill", function(d) {
+                return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
+            });
+
+        g.append("svg:text")
+            .text(function(d) { return d.key; });
 
         force.on("tick", tick);
 
         function tick() {
-        chart1.selectAll("circle")
-            .attr("cx", function(d) {
-                return d.x;
-            }) 
-             .attr("cy", function(d) {
-                return d.y;
-            });        
+            chart1.selectAll("circle")
+                .attr("cx", function(d) {
+                    return d.x;
+                }) 
+                .attr("cy", function(d) {
+                    return d.y;
+                });
+            chart1.selectAll("text")
+                .attr("x", function(d) {
+                    return d.x;
+                }) 
+                .attr("y", function(d) {
+                    return d.y;
+                });
         }
-
-        // var scaleRadius = d3.scaleLinear()
-        //     .domain([d3.min(data, function(d) { return +d.views; }), 
-        //             d3.max(data, function(d) { return +d.views; })])
-        //     .range([5,18]);
-
-        // var bubbleChart = bubbleChart();
-        // chart1.data(data).call(bubbleChart);
     });
-
 }
-
-// function bubbleChart() {
-//     function chart(selecttion) {
-
-//     }
-//     return chart;
-// }
-
