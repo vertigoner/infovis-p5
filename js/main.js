@@ -6,8 +6,8 @@
 * Noah Roberts
 */
 
-var width = 700;
-var height = 700;
+var width = 600;
+var height = 600;
 var diameter = 250;
 var colorRamp = ["#db4242", "#b76a40", "#93923e", "#6eba3c", "#4ae23a"];
 
@@ -35,13 +35,28 @@ function start() {
                     .attr("width", width * 2)
                     .attr("height", height);
 
+    var radiusScale = d3.scale.linear()
+        .domain([1, 2600])
+        .range([1, 40]);
+
+    var colorScale = d3.scale.linear()
+        .domain([1, 2600])
+        .range([0, colorRamp.length])
+    
+    var x = d3.scale.ordinal()
+        .rangeRoundBands([0, width], 0.5);
+    
+    var y = d3.scale.linear()
+        .domain([1, 2600])
+        .range([0, height]);
+
+    var candyMap = d3.map();
+
     d3.csv("./data/candy.csv", function(error, data) {
         if (error) {
             console.error("Error getting or parsing the data.");
             throw error;
         }
-
-        var candyMap = d3.map();
 
         for (let col of Object.keys(data[0])) {
             if (/^Q6_/.test(col)) {
@@ -78,14 +93,6 @@ function start() {
 
         var drag = force.drag();
 
-        var radiusScale = d3.scale.linear()
-            .domain([1, 2600])
-            .range([1, 40]);
-
-        var colorScale = d3.scale.linear()
-            .domain([1, 2600])
-            .range([0, colorRamp.length])
-
         var g = chart1.selectAll("g")
             .data(candyMapArray)
             .enter().append("g")
@@ -121,5 +128,27 @@ function start() {
                     return d.y;
                 });
         }
+
+        // create chart2
+
+        // map ordinal data to x axis
+        x.domain(candyMapArray.map(function(d) {
+            return d.key;
+        }));
+
+        chart2.selectAll(".bar")
+            .data(candyMapArray)
+            .enter().append("rect")
+            .attr("x", function(d) {
+                return x(d.key);
+            })
+            .attr("width", x.rangeBand())
+            .attr("y", function(d) {
+                return y(d.value.joy)
+            })
+            .attr("height", function(d) {
+                return height - y(d.value.joy);
+            })
+
     });
 }
