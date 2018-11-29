@@ -9,7 +9,7 @@
 var width = 600;
 var height = 600;
 var diameter = 250;
-var colorRamp = ["#db4242", "#b76a40", "#93923e", "#6eba3c", "#4ae23a"];
+var colorRamp = ['#edf8fb','#ccece6','#99d8c9','#66c2a4','#2ca25f','#006d2c'];
 
 function CandyEntry(joy, meh, despair) {
     this.joy = joy;
@@ -149,6 +149,5 @@ function start() {
             .attr("height", function(d) {
                 return height - y(d.value.joy);
             })
-
     });
 }
