@@ -6,10 +6,21 @@
 * Noah Roberts
 */
 
+
+// config
+
 var width = 600;
 var height = 600;
 var diameter = 250;
 var colorRamp = ['#edf8fb','#ccece6','#99d8c9','#66c2a4','#2ca25f','#006d2c'];
+var neutralColor = "lightgray";
+var selectedColor1 = "blue";
+var selectedColor2 = "red";
+
+var selected = {
+    bubble1: null,
+    bubble2: null
+}
 
 function CandyEntry(joy, meh, despair) {
     this.joy = joy;
@@ -83,7 +94,8 @@ function start() {
 
         //create chart1 
 
-        let candyMapArray = candyMap.entries();
+        var candyMapArray = candyMap.entries();
+        candyMapArray.shift();
 
         force = d3.layout.force() //set up force
             .size([width, height])
@@ -109,6 +121,35 @@ function start() {
 
         g.append("svg:text")
             .text(function(d) { return d.key; });
+
+        chart1.on("click", function() {
+            if (this === d3.event.target) {
+                chart1.selectAll("circle").attr("fill", function(d) {
+                    return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
+                });
+                selected.bubble1 = null;
+                selected.bubble2 = null;
+            } else {
+                chart1.selectAll("circle").attr("fill", function(d) {
+                    if (selected.bubble1 && d.key === selected.bubble1.data()[0].key) {
+                        return selectedColor1;
+                    } else {
+                        return neutralColor;
+                    }
+                });
+                console.log(selected);
+                var selectedBubble = d3.select(d3.event.target.parentNode);
+                var color;
+                if (!selected.bubble1) {
+                    selected.bubble1 = selectedBubble;
+                    color = selectedColor1;
+                } else {
+                    selected.bubble2 = selectedBubble;
+                    color = selectedColor2;
+                }
+                selectedBubble.select("circle").attr("fill", color);
+            }
+        });
 
         force.on("tick", tick);
 
