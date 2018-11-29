@@ -137,10 +137,10 @@ function start() {
                         return neutralColor;
                     }
                 });
-                console.log(selected);
+
                 var selectedBubble = d3.select(d3.event.target.parentNode);
                 var color;
-                if (!selected.bubble1) {
+                if (!selected.bubble1 || selectedBubble.data()[0].key === selected.bubble1.data()[0].key) {
                     selected.bubble1 = selectedBubble;
                     color = selectedColor1;
                 } else {
