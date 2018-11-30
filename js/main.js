@@ -191,7 +191,7 @@ function start() {
                 if (selected.indexOf(bubbleData) === -1 && selected.length < maxSelected) {
                     selectedBubble.select("circle")
                         .attr("fill", selectedColors[selected.length]);
-                    bubbleData.fill = selectedColors[selected.length]
+                    bubbleData.fill = selectedColors[selected.length];
                     selected.push(bubbleData);
                 }
             }
@@ -231,9 +231,6 @@ function start() {
                 .on("mouseout", function(d) {
                     tooltip.style("opacity", 0);
                 });
-            
-
         });
-
     });
 }
