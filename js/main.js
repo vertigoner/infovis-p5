@@ -6,17 +6,18 @@
 * Noah Roberts
 */
 
-var width = 700;
-var height = 700;
-var diameter = 250;
-var colorRamp = ['#5D2B7D','#A72D89','#1474BB','#8FC33E','#FEEE22','#E41E26'];
-var neutralColor = "lightgray";
-var selectedColors = ["red", "blue", "green", "orange", "yellow"];
-var filterColor = "magenta";
-var maxSelected = 5;
-var chart2BottomPadding = 50;
-var chart2LeftPadding = 100;
-var chart2TopPadding = 50;
+const width = 700;
+const height = 700;
+const diameter = 250;
+const colorRamp = ['#5D2B7D','#A72D89','#1474BB','#8FC33E','#FEEE22','#E41E26'];
+const neutralColor = "lightgray";
+const selectedColors = ["#003f5c", "#58508d", "#bc5090", "#ff6361", "#ffa600"];
+const filterColor = "#58508d";
+const histColor = filterColor;
+const maxSelected = 5;
+const chart2BottomPadding = 50;
+const chart2LeftPadding = 100;
+const chart2TopPadding = 50;
 
 var mode = "";
 var selected = [];
@@ -87,16 +88,17 @@ function start() {
 
     var xHist = d3.scale.linear()
         .domain([0, 100])
-        .range([0, width - chart2LeftPadding]);
+        .range([0, width - chart2LeftPadding - 10]);
 
     var yHist = d3.scale.linear()
-        .range([height / 2, 0]);
+        .range([height / 2 - chart2BottomPadding - 5, 0])
+        .domain([0, 200]);
 
     var filterButton = d3.select("#main")
         .append('p')
         .append('button')
         .text('Filter')
-        .attr('class', 'button')
+        .attr('class', 'button card')
         .on('click', function() {
             d3.select("#filter")
                 .style("visibility", "visible");
@@ -111,6 +113,9 @@ function start() {
             chart3_gender.selectAll("g")
                 .data([])
                 .exit().remove();
+            chart3_age.selectAll(".bar")
+                .data([])
+                .exit().remove();
             mode = "filter";
         });
 
@@ -118,7 +123,7 @@ function start() {
         .append('p')
         .append('button')
         .text('Compare')
-        .attr('class', 'button')
+        .attr('class', 'button card')
         .on('click', function() {
             d3.select("#details")
                 .style("visibility", "visible");
@@ -265,6 +270,31 @@ function start() {
         tooltip.append("span").attr("class", "meh");
         tooltip.append("span").attr("class", "despair");
 
+        // create chart3
+
+        chart3_age.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + chart2LeftPadding + "," + (height / 2 - chart2BottomPadding) + ")")
+            .call(d3.svg.axis().scale(xHist).orient("bottom"));
+
+        chart3_age.append("text")             
+            .attr("transform", "translate(" + (width / 2 + 30) + "," + (height / 2 - 10) + ")")
+            .style("text-anchor", "middle")
+            .text("Distribution of \"Joy\" votes for selected candy");
+
+        chart3_age.append("g")
+            .attr("transform", "translate(" + chart2LeftPadding + "," + 5 + ")")
+            .attr("class", "axis")
+            .call(d3.svg.axis().scale(yHist).orient("left"));
+
+        chart3_age.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 50)
+            .attr("x", 0 - height / 4)
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Number of \"Joy\" votes");
+
         chart1.on("click", function() {
             if (this === d3.event.target || selected.length === maxSelected || mode === "") {
                 chart1.selectAll("circle").attr("fill", function(d) {
@@ -274,6 +304,9 @@ function start() {
                 chart2.selectAll("rect").data([]).exit().remove();
                 filterSelected = new CandyEntry(0,0,0);
                 chart3_gender.selectAll("g")
+                    .data([])
+                    .exit().remove();
+                chart3_age.selectAll(".bar")
                     .data([])
                     .exit().remove();
             } else {
@@ -411,10 +444,10 @@ function start() {
                 tooltip.style("opacity", 0.9)
                     .style("left", d3.event.pageX + "px")
                     .style("top", d3.event.pageY + "px")
-                tooltip.select(".name").text(filterSelected.key);
-                tooltip.select(".joy").text("'Joy' votes: " + d.value.joy);
-                tooltip.select(".meh").text("'Meh' votes: " + d.value.meh);
-                tooltip.select(".despair").text("'Despair' votes: " + d.value.despair);
+                tooltip.select(".name").text(filterSelected.key + ": " + d.key + " votes");
+                tooltip.select(".joy").text("\"Joy\" votes: " + d.value.joy);
+                tooltip.select(".meh").text("\"Meh\" votes: " + d.value.meh);
+                tooltip.select(".despair").text("\"Despair\" votes: " + d.value.despair);
             })
             .on("mouseout", function(d) {
                 tooltip.style("opacity", 0);
@@ -451,9 +484,9 @@ function start() {
                         .style("left", d3.event.pageX + "px")
                         .style("top", d3.event.pageY + "px")
                     tooltip.select(".name").text(d.key);
-                    tooltip.select(".joy").text("'Joy' votes: " + d.value.joy);
-                    tooltip.select(".meh").text("'Meh' votes: " + d.value.meh);
-                    tooltip.select(".despair").text("'Despair' votes: " + d.value.despair);
+                    tooltip.select(".joy").text("\"Joy\" votes: " + d.value.joy);
+                    tooltip.select(".meh").text("\"Meh\" votes: " + d.value.meh);
+                    tooltip.select(".despair").text("\"Despair\" votes: " + d.value.despair);
                 })
                 .on("mouseout", function(d) {
                     tooltip.style("opacity", 0);
@@ -467,24 +500,27 @@ function start() {
                 }
             });
 
-            yHist.domain([0, 200]);
-
             var bins = d3.layout.histogram()
                 .bins(xHist.ticks(30))
                 (ageArray);
+
+            chart3_age.selectAll(".bar").data([]).exit().remove();
                 
             var histBar = chart3_age.selectAll(".bar")
                 .data(bins)
                 .enter().append("g")
                 .attr("class", "bar")
-                .attr("transform", function(d) { return "translate(" + xHist(d.x) + "," + yHist(d.y) + ")"; });
-
-            console.log(histBar)
+                .attr("transform", function(d) {
+                    return "translate(" + (xHist(d.x) + chart2LeftPadding + 1) + "," + (yHist(d.y)) + ")";
+                });
 
             histBar.append("rect")
                 .attr("x", 1)
-                .attr("width", 25)
-                .attr("height", function(d) { return height / 2 - yHist(d.y); });
+                .attr("width", 28)
+                .attr("height", function(d) {
+                    return height / 2 - chart2BottomPadding - yHist(d.y);
+                })
+                .attr("fill", histColor);
         }
     });
 
