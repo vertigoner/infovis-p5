@@ -85,6 +85,13 @@ function start() {
         .domain([1, 2600])
         .range([height - chart2BottomPadding - chart2TopPadding, 0]);
 
+    var xHist = d3.scale.linear()
+        .domain([0, 100])
+        .range([0, width - chart2LeftPadding]);
+
+    var yHist = d3.scale.linear()
+        .range([height / 2, 0]);
+
     var filterButton = d3.select("#main")
         .append('p')
         .append('button')
@@ -161,7 +168,7 @@ function start() {
                         candyEntry.meh++;
                     } else if (d[col] === "DESPAIR") {
                         candyEntry.despair++;
-                    }
+                    } else if (d[col] === "")
                     candyMap.set(key, candyEntry);
                 }
             }
@@ -451,6 +458,33 @@ function start() {
                 .on("mouseout", function(d) {
                     tooltip.style("opacity", 0);
                 });
+
+
+            var ageArray = [];
+            data.forEach(function(d) {
+                if (d["Q6_" + filterSelected.key] === "JOY") {
+                    ageArray.push(d.Q3_AGE);
+                }
+            });
+
+            yHist.domain([0, 200]);
+
+            var bins = d3.layout.histogram()
+                .bins(xHist.ticks(30))
+                (ageArray);
+                
+            var histBar = chart3_age.selectAll(".bar")
+                .data(bins)
+                .enter().append("g")
+                .attr("class", "bar")
+                .attr("transform", function(d) { return "translate(" + xHist(d.x) + "," + yHist(d.y) + ")"; });
+
+            console.log(histBar)
+
+            histBar.append("rect")
+                .attr("x", 1)
+                .attr("width", 25)
+                .attr("height", function(d) { return height / 2 - yHist(d.y); });
         }
     });
 
