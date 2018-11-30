@@ -20,3 +20,39 @@ text {
 #candy {
     display: hidden;
 }
+
+.axis path, .axis line {
+    fill: none;
+    stroke: slategray;
+    shape-rendering: crispEdges;
+}
+
+.tooltip {	
+    position: absolute;			
+    text-align: center;	
+    background-color: lightgray;		
+    width: 125px;					
+    height: 125px;					
+    padding: 2px;				
+    font: 12px sans-serif;				
+    pointer-events: none;			
+}
+
+.tooltip span {
+    display: block;
+    line-height: 22px;
+}
+
+.tooltip .name {
+    font-weight: bold;
+}
+
+.card {
+    border: 1px solid rgba(0,0,0,0.02);
+    border-radius: 3px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      0 2px 2px rgba(0,0,0,0.05),
+      0 0 4px 1px rgba(0,0,0,0.02);
+  }
+  
