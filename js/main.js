@@ -139,6 +139,7 @@ function start() {
         //create chart1 
 
         let candyMapArray = candyMap.entries();
+        candyMapArray.shift();
 
         force = d3.layout.force() //set up force
             .size([width, height])
@@ -233,6 +234,9 @@ function start() {
                 });
                 selected = []; // clear array
                 filterSelected = new CandyEntry(0,0,0);
+                chart3_gender.selectAll("g")
+                    .data([])
+                    .exit().remove();
             } else {
                 if (selected.length === 0) {
                     chart1.selectAll("circle").attr("fill", neutralColor);
@@ -319,7 +323,6 @@ function start() {
             genderMap.set('Other', other);
 
             var genderMapArray = genderMap.entries();
-            console.log(genderMapArray);
 
             force2 = d3.layout.force() //set up force
             .size([width, height/2])
@@ -349,7 +352,6 @@ function start() {
             .attr("r", function(d) {
                 var normalizedData = (d.value.joy * 2 + d.value.meh) / (d.value.joy +
                     d.value.meh + d.value.despair);
-                console.log(normalizedData);
                 return genderRadiusScale(normalizedData);
             })
             .attr("fill", function(d) {
@@ -360,6 +362,18 @@ function start() {
                 } else {
                     return "#9ee393";
                 }
+            });
+            g1.on("mousemove", function(d) {
+                tooltip.style("opacity", 0.9)
+                    .style("left", d3.event.pageX + "px")
+                    .style("top", d3.event.pageY + "px")
+                tooltip.select(".name").text(filterSelected.key);
+                tooltip.select(".joy").text("'Joy' votes: " + d.value.joy);
+                tooltip.select(".meh").text("'Meh' votes: " + d.value.meh);
+                tooltip.select(".despair").text("'Despair' votes: " + d.value.despair);
+            })
+            .on("mouseout", function(d) {
+                tooltip.style("opacity", 0);
             });
 
             g1.append("svg:text")
