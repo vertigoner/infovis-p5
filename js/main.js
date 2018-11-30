@@ -9,7 +9,12 @@
 var width = 700;
 var height = 700;
 var diameter = 250;
-var colorRamp = ["#db4242", "#b76a40", "#93923e", "#6eba3c", "#4ae23a"];
+var colorRamp = ['#5D2B7D','#A72D89','#1474BB','#8FC33E','#FEEE22','#E41E26'];
+var neutralColor = "lightgray";
+var selectedColors = ["red", "blue", "green", "orange"];
+var maxSelected = 5;
+
+var selected = [];
 
 function CandyEntry(joy, meh, despair) {
     this.joy = joy;
@@ -40,6 +45,10 @@ function start() {
                     .attr("width", width)
                     .attr("height", height / 2);
 
+
+    var radiusScale = d3.scale.linear()
+        .domain([1, 2600])
+        .range([1, 45]);
 
     var filterButton = d3.select("#filter")
         .append('p')
@@ -131,6 +140,27 @@ function start() {
         g.append("svg:text")
             .text(function(d) { return d.key; });
 
+        chart1.on("click", function() {
+            if (this === d3.event.target) {
+                chart1.selectAll("circle").attr("fill", function(d) {
+                    return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
+                });
+                selected = []; // clear array
+            } else {
+                if (selected.length === 0) {
+                    chart1.selectAll("circle").attr("fill", neutralColor);
+                }
+
+                var selectedBubble = d3.select(d3.event.target.parentNode);
+                var bubbleData = selectedBubble.data()[0];
+                if (selected.indexOf(bubbleData) === -1 && selected.length < maxSelected) {
+                    selectedBubble.select("circle")
+                        .attr("fill", selectedColors[selected.length]);
+                    selected.push(selectedBubble.data()[0]);
+                }
+            }
+        });
+
         force.on("tick", tick);
 
         function tick() {
@@ -150,7 +180,14 @@ function start() {
                 });
         }
 
-        //create chart2
+        // create chart2
 
+        // map ordinal data to x axis
+        x.domain(candyMapArray.map(function(d) {
+            return d.key;
+        }));
+        console.log(candyMapArray);
+        console.log(selected.entries())
+        
     });
 }
