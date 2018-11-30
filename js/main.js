@@ -12,11 +12,13 @@ var diameter = 250;
 var colorRamp = ['#5D2B7D','#A72D89','#1474BB','#8FC33E','#FEEE22','#E41E26'];
 var neutralColor = "lightgray";
 var selectedColors = ["red", "blue", "green", "orange", "yellow"];
+var filterColor = "magenta";
 var maxSelected = 5;
 var chart2BottomPadding = 50;
 var chart2LeftPadding = 100;
 var chart2TopPadding = 50;
 
+var mode = "";
 var selected = [];
 var filterSelected; //initialize as Butterfinger
 
@@ -48,9 +50,9 @@ window.onload = start;
 
 function start() {
     var chart1 = d3.select("#bubblechart")
-                        .append("svg:svg")
-                        .attr("width", width)
-                        .attr("height", height);
+                    .append("svg:svg")
+                    .attr("width", width)
+                    .attr("height", height);
 
     var chart2 = d3.select("#details")
                     .append("svg:svg")
@@ -83,17 +85,46 @@ function start() {
         .domain([1, 2600])
         .range([height - chart2BottomPadding - chart2TopPadding, 0]);
 
-    var filterButton = d3.select("#filter")
+    var filterButton = d3.select("#main")
         .append('p')
         .append('button')
         .text('Filter')
         .attr('class', 'button')
+        .on('click', function() {
+            d3.select("#filter")
+                .style("visibility", "visible");
+            d3.select("#details")
+                .style("visibility", "hidden");
+            
+            chart1.selectAll("circle").attr("fill", function(d) {
+                return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
+            });
+            filterSelected = new CandyEntry(0,0,0);
+            selected = [];
+            chart3_gender.selectAll("g")
+                .data([])
+                .exit().remove();
+            mode = "filter";
+        });
 
-    var compareButton = d3.select("#filter") 
+    var compareButton = d3.select("#main") 
         .append('p')
         .append('button')
         .text('Compare')
         .attr('class', 'button')
+        .on('click', function() {
+            d3.select("#details")
+                .style("visibility", "visible");
+            d3.select("#filter")
+                .style("visibility", "hidden");
+            chart1.selectAll("circle").attr("fill", function(d) {
+                return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
+            });
+            selected = []; // clear array
+            filterSelected = new CandyEntry(0,0,0);
+            chart2.selectAll("rect").data([]).exit().remove();
+            mode = "compare";
+        });
 
     d3.csv("./data/candy.csv", function(error, data) {
         if (error) {
@@ -228,11 +259,12 @@ function start() {
         tooltip.append("span").attr("class", "despair");
 
         chart1.on("click", function() {
-            if (this === d3.event.target || selected.length === maxSelected) {
+            if (this === d3.event.target || selected.length === maxSelected || mode === "") {
                 chart1.selectAll("circle").attr("fill", function(d) {
                     return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
                 });
                 selected = []; // clear array
+                chart2.selectAll("rect").data([]).exit().remove();
                 filterSelected = new CandyEntry(0,0,0);
                 chart3_gender.selectAll("g")
                     .data([])
@@ -244,12 +276,17 @@ function start() {
 
                 var selectedBubble = d3.select(d3.event.target.parentNode);
                 var bubbleData = selectedBubble.data()[0];
-                if (selected.indexOf(bubbleData) === -1 && selected.length < maxSelected) {
+
+                if (mode === "filter") {
+                    selectedBubble.select("circle")
+                        .attr("fill", filterColor);
+                        filterSelected = bubbleData;
+                } else if (selected.indexOf(bubbleData) === -1 && selected.length < maxSelected) {
                     selectedBubble.select("circle")
                         .attr("fill", selectedColors[selected.length]);
                     bubbleData.fill = selectedColors[selected.length];
                     selected.push(bubbleData);
-                    filterSelected = bubbleData; //ADD LOGIC AND FIX!!!! PLEASE FIX...
+                    filterSelected = bubbleData;
                 }
             }
 

@@ -6,13 +6,13 @@
     padding: 5px 5px;
 }
 
-/*svg {
+/* svg {
      background-color: blue; 
 }
 
 #filter {
     background-color: red;
-}*/
+} */
 
 text {
     font-family: sans-serif;
@@ -70,3 +70,9 @@ text {
     left: 20px;
 }
 
+#details, #filter {
+    position: absolute;
+    visibility: hidden;
+    left: 705px;
+    top: 5px;
+}
