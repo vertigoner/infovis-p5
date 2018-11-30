@@ -12,15 +12,12 @@
 var width = 600;
 var height = 600;
 var diameter = 250;
-var colorRamp = ['#edf8fb','#ccece6','#99d8c9','#66c2a4','#2ca25f','#006d2c'];
+var colorRamp = ['#5D2B7D','#A72D89','#1474BB','#8FC33E','#FEEE22','#E41E26'];
 var neutralColor = "lightgray";
-var selectedColor1 = "blue";
-var selectedColor2 = "red";
+var selectedColors = ["red", "blue", "green", "orange"];
+var maxSelected = 5;
 
-var selected = {
-    bubble1: null,
-    bubble2: null
-}
+var selected = [];
 
 function CandyEntry(joy, meh, despair) {
     this.joy = joy;
@@ -48,7 +45,7 @@ function start() {
 
     var radiusScale = d3.scale.linear()
         .domain([1, 2600])
-        .range([1, 40]);
+        .range([1, 45]);
 
     var colorScale = d3.scale.linear()
         .domain([1, 2600])
@@ -127,27 +124,19 @@ function start() {
                 chart1.selectAll("circle").attr("fill", function(d) {
                     return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
                 });
-                selected.bubble1 = null;
-                selected.bubble2 = null;
+                selected = []; // clear array
             } else {
-                chart1.selectAll("circle").attr("fill", function(d) {
-                    if (selected.bubble1 && d.key === selected.bubble1.data()[0].key) {
-                        return selectedColor1;
-                    } else {
-                        return neutralColor;
-                    }
-                });
+                if (selected.length === 0) {
+                    chart1.selectAll("circle").attr("fill", neutralColor);
+                }
 
                 var selectedBubble = d3.select(d3.event.target.parentNode);
-                var color;
-                if (!selected.bubble1 || selectedBubble.data()[0].key === selected.bubble1.data()[0].key) {
-                    selected.bubble1 = selectedBubble;
-                    color = selectedColor1;
-                } else {
-                    selected.bubble2 = selectedBubble;
-                    color = selectedColor2;
+                var bubbleData = selectedBubble.data()[0];
+                if (selected.indexOf(bubbleData) === -1 && selected.length < maxSelected) {
+                    selectedBubble.select("circle")
+                        .attr("fill", selectedColors[selected.length]);
+                    selected.push(selectedBubble.data()[0]);
                 }
-                selectedBubble.select("circle").attr("fill", color);
             }
         });
 
@@ -176,6 +165,8 @@ function start() {
         x.domain(candyMapArray.map(function(d) {
             return d.key;
         }));
+        console.log(candyMapArray);
+        console.log(selected.entries())
 
         chart2.selectAll(".bar")
             .data(candyMapArray)
