@@ -6,11 +6,8 @@
 * Noah Roberts
 */
 
-
-// config
-
-var width = 600;
-var height = 600;
+var width = 700;
+var height = 700;
 var diameter = 250;
 var colorRamp = ['#5D2B7D','#A72D89','#1474BB','#8FC33E','#FEEE22','#E41E26'];
 var neutralColor = "lightgray";
@@ -21,8 +18,27 @@ var chart2LeftPadding = 100;
 var chart2TopPadding = 50;
 
 var selected = [];
+var filterSelected; //initialize as Butterfinger
 
 function CandyEntry(joy, meh, despair) {
+    this.joy = joy;
+    this.meh = meh;
+    this.despair = despair;
+}
+
+function maleEntry(joy, meh, despair) {
+    this.joy = joy;
+    this.meh = meh;
+    this.despair = despair;
+}
+
+function femaleEntry(joy, meh, despair) {
+    this.joy = joy;
+    this.meh = meh;
+    this.despair = despair;
+}
+
+function otherEntry(joy, meh, despair) {
     this.joy = joy;
     this.meh = meh;
     this.despair = despair;
@@ -41,10 +57,16 @@ function start() {
                     .attr("width", width)
                     .attr("height", height);
 
-    var chart3 = d3.select("#map")
+    var chart3_gender = d3.select("#filter")
                     .append("svg:svg")
-                    .attr("width", width * 2)
-                    .attr("height", height);
+                    .attr("width", width)
+                    .attr("height", height / 2);
+
+    var chart3_age = d3.select("#filter")
+                    .append("svg:svg")
+                    .attr("width", width)
+                    .attr("height", height / 2);
+
 
     var radiusScale = d3.scale.linear()
         .domain([1, 2600])
@@ -61,13 +83,35 @@ function start() {
         .domain([1, 2600])
         .range([height - chart2BottomPadding - chart2TopPadding, 0]);
 
-    var candyMap = d3.map();
+    var filterButton = d3.select("#filter")
+        .append('p')
+        .append('button')
+        .text('Filter')
+        .attr('class', 'button')
+
+    var compareButton = d3.select("#filter") 
+        .append('p')
+        .append('button')
+        .text('Compare')
+        .attr('class', 'button')
 
     d3.csv("./data/candy.csv", function(error, data) {
         if (error) {
             console.error("Error getting or parsing the data.");
             throw error;
         }
+/*
+        var personMap = d3.nest()
+            .key(function(d) { return d.Q2_GENDER; })
+            .key(function(d) { return d.Q6_Butterfinger; })
+            .entries(data);
+
+        console.log(personMap);
+        console.log( ((d3.values(personMap[0]))[1]) );
+        var test = ((d3.values(personMap[0]))[1])[2];
+        console.log(d3.values(test)[1].length);
+*/
+        var candyMap = d3.map();
 
         for (let col of Object.keys(data[0])) {
             if (/^Q6_/.test(col)) {
@@ -94,8 +138,7 @@ function start() {
 
         //create chart1 
 
-        var candyMapArray = candyMap.entries();
-        candyMapArray.shift();
+        let candyMapArray = candyMap.entries();
 
         force = d3.layout.force() //set up force
             .size([width, height])
@@ -104,6 +147,14 @@ function start() {
             .start();
 
         var drag = force.drag();
+
+        var radiusScale = d3.scale.linear()
+            .domain([1, 2600])
+            .range([1, 40]);
+
+        var colorScale = d3.scale.linear()
+            .domain([1, 2600])
+            .range([0, colorRamp.length])
 
         var g = chart1.selectAll("g")
             .data(candyMapArray)
@@ -181,6 +232,7 @@ function start() {
                     return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
                 });
                 selected = []; // clear array
+                filterSelected = new CandyEntry(0,0,0);
             } else {
                 if (selected.length === 0) {
                     chart1.selectAll("circle").attr("fill", neutralColor);
@@ -193,8 +245,125 @@ function start() {
                         .attr("fill", selectedColors[selected.length]);
                     bubbleData.fill = selectedColors[selected.length];
                     selected.push(bubbleData);
+                    filterSelected = bubbleData; //ADD LOGIC AND FIX!!!! PLEASE FIX...
                 }
             }
+
+            //FILTER GENDER
+            if (filterSelected && filterSelected.key) {
+            var male = new maleEntry(0, 0, 0);
+            var female = new femaleEntry(0, 0, 0);
+            var other = new otherEntry(0, 0, 0);
+
+            var personMap = d3.nest()
+            .key(function(d) { return d.Q2_GENDER; })
+            .key(function(d) { 
+                return d["Q6_" + filterSelected.key] })
+            .entries(data);
+
+            for (i = 0; i < personMap.length; i++) {
+                if (personMap[i].key === 'Male') {
+                    for (j = 0; j < ((d3.values(personMap[i]))[1]).length; j++) {
+                        var tempArray = ((d3.values(personMap[i]))[1])[j];
+                        var scoreType = d3.values(tempArray)[0];
+                        if (scoreType === "JOY") {
+                            male.joy = d3.values(tempArray)[1].length;
+                        }
+
+                        if (scoreType === "MEH") {
+                            male.meh = d3.values(tempArray)[1].length;
+                        }
+
+                        if (scoreType === "DESPAIR") {
+                            male.despair = d3.values(tempArray)[1].length;
+                        }
+                    }
+                } else if (personMap[i].key === 'Female') {
+                    for (j = 0; j < ((d3.values(personMap[i]))[1]).length; j++) {
+                        var tempArray = ((d3.values(personMap[i]))[1])[j];
+                        var scoreType = d3.values(tempArray)[0];
+                        if (scoreType === "JOY") {
+                            female.joy = d3.values(tempArray)[1].length;
+                        }
+
+                        if (scoreType === "MEH") {
+                            female.meh = d3.values(tempArray)[1].length;
+                        }
+
+                        if (scoreType === "DESPAIR") {
+                            female.despair = d3.values(tempArray)[1].length;
+                        }
+                    }
+                } else {
+                    for (j = 0; j < ((d3.values(personMap[i]))[1]).length; j++) {
+                        var tempArray = ((d3.values(personMap[i]))[1])[j];
+                        var scoreType = d3.values(tempArray)[0];
+                        if (scoreType === "JOY") {
+                            other.joy += d3.values(tempArray)[1].length;
+                        }
+
+                        if (scoreType === "MEH") {
+                            other.meh += d3.values(tempArray)[1].length;
+                        }
+
+                        if (scoreType === "DESPAIR") {
+                            other.despair += d3.values(tempArray)[1].length;
+                        }
+                    }
+                }
+            }
+
+            var genderMap = d3.map();
+            genderMap.set('Male', male);
+            genderMap.set('Female', female);
+            genderMap.set('Other', other);
+
+            var genderMapArray = genderMap.entries();
+            console.log(genderMapArray);
+
+            force2 = d3.layout.force() //set up force
+            .size([width, height/2])
+            .nodes(genderMapArray)
+            .charge(-1000)
+            .start();
+
+            force2.on("tick", tick2);
+
+            var drag2 = force2.drag();
+
+            var genderRadiusScale = d3.scale.linear()
+            .domain([0, 2])
+            .range([1, 90]);
+
+            chart3_gender.selectAll("g")
+            .data([])
+            .exit().remove();
+
+            var g1 = chart3_gender.selectAll("g")
+            .data(genderMapArray)
+            .enter().append("g")
+            .call(drag2);
+
+            g1.append("circle")
+            .attr("class", "genders")
+            .attr("r", function(d) {
+                var normalizedData = (d.value.joy * 2 + d.value.meh) / (d.value.joy +
+                    d.value.meh + d.value.despair);
+                console.log(normalizedData);
+                return genderRadiusScale(normalizedData);
+            })
+            .attr("fill", function(d) {
+                if (d.key === "Male") {
+                    return "#e96fdf";
+                } else if (d.key == "Female") {
+                    return "#6f86e9";
+                } else {
+                    return "#9ee393";
+                }
+            });
+
+            g1.append("svg:text")
+            .text(function(d) { return d.key; });
 
             chart2.selectAll("rect").data([]).exit().remove();
 
@@ -231,6 +400,35 @@ function start() {
                 .on("mouseout", function(d) {
                     tooltip.style("opacity", 0);
                 });
-        });
+        }
+    });
+
+        function tick2() {
+            chart3_gender.selectAll("circle")
+                .attr("cx", function(d) {
+                    return d.x;
+                }) 
+                .attr("cy", function(d) {
+                    return d.y;
+                });
+            chart3_gender.selectAll("text")
+                .attr("x", function(d) {
+                    return d.x;
+                }) 
+                .attr("y", function(d) {
+                    return d.y;
+                });
+        }
+
+        // create chart2
+
+        // map ordinal data to x axis
+        /*x.domain(candyMapArray.map(function(d) {
+            return d.key;
+        }));*/
+        //console.log(candyMapArray);
+        //console.log(selected.entries());
+
+        //create gender filter
     });
 }

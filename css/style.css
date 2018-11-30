@@ -6,15 +6,20 @@
     padding: 5px 5px;
 }
 
-svg {
-    /* background-color: blue; */
+/*svg {
+     background-color: blue; 
 }
+
+#filter {
+    background-color: red;
+}*/
 
 text {
     font-family: sans-serif;
     text-anchor: middle;
-    stroke: black;
     position: relative; 
+    font-size: 10px;
+    font-family: "Tahoma", serif;
 }
 
 #candy {
@@ -56,3 +61,12 @@ text {
       0 0 4px 1px rgba(0,0,0,0.02);
   }
   
+.button {
+    width: 75px;
+    height: 25px;
+    position: relative; 
+    float:left;
+    bottom: 700px;
+    left: 20px;
+}
+
