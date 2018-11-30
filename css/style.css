@@ -7,16 +7,31 @@
 }
 
 svg {
-    /* background-color: blue; */
+     background-color: blue; 
+}
+
+#filter {
+    background-color: red;
 }
 
 text {
     font-family: sans-serif;
     text-anchor: middle;
-    stroke: black;
     position: relative; 
+    font-size: 10px;
+    font-family: "Tahoma", serif;
 }
 
 #candy {
     display: hidden;
 }
+
+.button {
+    width: 75px;
+    height: 25px;
+    position: relative; 
+    float:left;
+    bottom: 700px;
+    left: 20px;
+}
+

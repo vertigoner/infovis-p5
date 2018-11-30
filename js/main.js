@@ -6,21 +6,10 @@
 * Noah Roberts
 */
 
-
-// config
-
-var width = 600;
-var height = 600;
+var width = 700;
+var height = 700;
 var diameter = 250;
-var colorRamp = ['#edf8fb','#ccece6','#99d8c9','#66c2a4','#2ca25f','#006d2c'];
-var neutralColor = "lightgray";
-var selectedColor1 = "blue";
-var selectedColor2 = "red";
-
-var selected = {
-    bubble1: null,
-    bubble2: null
-}
+var colorRamp = ["#db4242", "#b76a40", "#93923e", "#6eba3c", "#4ae23a"];
 
 function CandyEntry(joy, meh, despair) {
     this.joy = joy;
@@ -41,33 +30,46 @@ function start() {
                     .attr("width", width)
                     .attr("height", height);
 
-    var chart3 = d3.select("#map")
+    var chart3_gender = d3.select("#filter")
                     .append("svg:svg")
-                    .attr("width", width * 2)
-                    .attr("height", height);
+                    .attr("width", width)
+                    .attr("height", height / 2);
 
-    var radiusScale = d3.scale.linear()
-        .domain([1, 2600])
-        .range([1, 40]);
+    var chart3_age = d3.select("#filter")
+                    .append("svg:svg")
+                    .attr("width", width)
+                    .attr("height", height / 2);
 
-    var colorScale = d3.scale.linear()
-        .domain([1, 2600])
-        .range([0, colorRamp.length])
-    
-    var x = d3.scale.ordinal()
-        .rangeRoundBands([0, width], 0.5);
-    
-    var y = d3.scale.linear()
-        .domain([1, 2600])
-        .range([0, height]);
 
-    var candyMap = d3.map();
+    var filterButton = d3.select("#filter")
+        .append('p')
+        .append('button')
+        .text('Filter')
+        .attr('class', 'button')
+
+    var compareButton = d3.select("#filter") 
+        .append('p')
+        .append('button')
+        .text('Compare')
+        .attr('class', 'button')
 
     d3.csv("./data/candy.csv", function(error, data) {
         if (error) {
             console.error("Error getting or parsing the data.");
             throw error;
         }
+/*
+        var personMap = d3.nest()
+            .key(function(d) { return d.Q2_GENDER; })
+            .key(function(d) { return d.Q6_Butterfinger; })
+            .entries(data);
+
+        console.log(personMap);
+        //IMPORTANT console.log( ((d3.values(personMap[0]))[1])[0] );
+        var test = ((d3.values(personMap[0]))[1])[0];
+        console.log(d3.values(test)[1].length);
+*/
+        var candyMap = d3.map();
 
         for (let col of Object.keys(data[0])) {
             if (/^Q6_/.test(col)) {
@@ -94,8 +96,7 @@ function start() {
 
         //create chart1 
 
-        var candyMapArray = candyMap.entries();
-        candyMapArray.shift();
+        let candyMapArray = candyMap.entries();
 
         force = d3.layout.force() //set up force
             .size([width, height])
@@ -104,6 +105,14 @@ function start() {
             .start();
 
         var drag = force.drag();
+
+        var radiusScale = d3.scale.linear()
+            .domain([1, 2600])
+            .range([1, 40]);
+
+        var colorScale = d3.scale.linear()
+            .domain([1, 2600])
+            .range([0, colorRamp.length])
 
         var g = chart1.selectAll("g")
             .data(candyMapArray)
@@ -121,35 +130,6 @@ function start() {
 
         g.append("svg:text")
             .text(function(d) { return d.key; });
-
-        chart1.on("click", function() {
-            if (this === d3.event.target) {
-                chart1.selectAll("circle").attr("fill", function(d) {
-                    return colorRamp[Math.floor(colorScale(d.value.joy * 2 + d.value.meh))];
-                });
-                selected.bubble1 = null;
-                selected.bubble2 = null;
-            } else {
-                chart1.selectAll("circle").attr("fill", function(d) {
-                    if (selected.bubble1 && d.key === selected.bubble1.data()[0].key) {
-                        return selectedColor1;
-                    } else {
-                        return neutralColor;
-                    }
-                });
-                console.log(selected);
-                var selectedBubble = d3.select(d3.event.target.parentNode);
-                var color;
-                if (!selected.bubble1) {
-                    selected.bubble1 = selectedBubble;
-                    color = selectedColor1;
-                } else {
-                    selected.bubble2 = selectedBubble;
-                    color = selectedColor2;
-                }
-                selectedBubble.select("circle").attr("fill", color);
-            }
-        });
 
         force.on("tick", tick);
 
@@ -170,25 +150,7 @@ function start() {
                 });
         }
 
-        // create chart2
+        //create chart2
 
-        // map ordinal data to x axis
-        x.domain(candyMapArray.map(function(d) {
-            return d.key;
-        }));
-
-        chart2.selectAll(".bar")
-            .data(candyMapArray)
-            .enter().append("rect")
-            .attr("x", function(d) {
-                return x(d.key);
-            })
-            .attr("width", x.rangeBand())
-            .attr("y", function(d) {
-                return y(d.value.joy)
-            })
-            .attr("height", function(d) {
-                return height - y(d.value.joy);
-            })
     });
 }
