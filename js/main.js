@@ -62,11 +62,13 @@ function start() {
 
     var chart3_gender = d3.select("#filter")
                     .append("svg:svg")
+                    .attr("id", "chart3Gender")
                     .attr("width", width)
                     .attr("height", height / 2);
 
     var chart3_age = d3.select("#filter")
                     .append("svg:svg")
+                    .attr("id", "chart3Age")
                     .attr("width", width)
                     .attr("height", height / 2);
 
@@ -92,12 +94,11 @@ function start() {
 
     var yHist = d3.scale.linear()
         .range([height / 2 - chart2BottomPadding - 5, 0])
-        .domain([0, 200]);
+        .domain([0, 215]);
 
-    var filterButton = d3.select("#main")
-        .append('p')
+    var filterButton = d3.select("#buttonWrapper")
         .append('button')
-        .text('Filter')
+        .text('Demographics')
         .attr('class', 'button card')
         .on('click', function() {
             d3.select("#filter")
@@ -117,10 +118,16 @@ function start() {
                 .data([])
                 .exit().remove();
             mode = "filter";
+
+            chart3_gender.append("text")
+                .attr("class", "welcomeText")
+                .text("Please select a candy")
+                .attr("x", "50%")
+                .attr("y", "50%")
+                .style("font-size", "14px")
         });
 
-    var compareButton = d3.select("#main") 
-        .append('p')
+    var compareButton = d3.select("#buttonWrapper") 
         .append('button')
         .text('Compare')
         .attr('class', 'button card')
@@ -143,17 +150,7 @@ function start() {
             console.error("Error getting or parsing the data.");
             throw error;
         }
-/*
-        var personMap = d3.nest()
-            .key(function(d) { return d.Q2_GENDER; })
-            .key(function(d) { return d.Q6_Butterfinger; })
-            .entries(data);
 
-        console.log(personMap);
-        console.log( ((d3.values(personMap[0]))[1]) );
-        var test = ((d3.values(personMap[0]))[1])[2];
-        console.log(d3.values(test)[1].length);
-*/
         var candyMap = d3.map();
 
         for (let col of Object.keys(data[0])) {
@@ -280,7 +277,7 @@ function start() {
         chart3_age.append("text")             
             .attr("transform", "translate(" + (width / 2 + 30) + "," + (height / 2 - 10) + ")")
             .style("text-anchor", "middle")
-            .text("Distribution of \"Joy\" votes for selected candy");
+            .text("Age Distribution for Selected Candy");
 
         chart3_age.append("g")
             .attr("transform", "translate(" + chart2LeftPadding + "," + 5 + ")")
@@ -293,7 +290,7 @@ function start() {
             .attr("x", 0 - height / 4)
             .attr("dy", "1em")
             .style("text-anchor", "middle")
-            .text("Number of \"Joy\" votes");
+            .text("Number of \"Joy\" Votes");
 
         chart1.on("click", function() {
             if (this === d3.event.target || selected.length === maxSelected || mode === "") {
@@ -329,6 +326,8 @@ function start() {
                     filterSelected = bubbleData;
                 }
             }
+
+            chart3_gender.select(".welcomeText").remove();
 
             //FILTER GENDER
             if (filterSelected && filterSelected.key) {
@@ -454,7 +453,8 @@ function start() {
             });
 
             g1.append("svg:text")
-            .text(function(d) { return d.key; });
+                .text(function(d) { return d.key; })
+                .attr("class", "bubbleText");
 
             chart2.selectAll("rect").data([]).exit().remove();
 
@@ -532,7 +532,7 @@ function start() {
                 .attr("cy", function(d) {
                     return d.y;
                 });
-            chart3_gender.selectAll("text")
+            chart3_gender.selectAll(".bubbleText")
                 .attr("x", function(d) {
                     return d.x;
                 }) 

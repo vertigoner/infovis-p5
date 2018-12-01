@@ -1,3 +1,22 @@
+#header {
+    text-align: center;
+    width: 600px;
+    margin: 30px auto;
+}
+
+#buttonWrapper {
+    margin: 0 auto;
+    line-height: 40px;
+}
+
+#desc {
+    margin: 0 auto;
+    width: 600px;
+    text-align: justify;
+    font-size: 14px;
+    line-height: 15px;
+}
+
 #wrapper1 {
     display: flex;
 }
@@ -5,14 +24,6 @@
 .chart {
     padding: 5px 5px;
 }
-
-/* svg {
-     background-color: blue; 
-}
-
-#filter {
-    background-color: red;
-} */
 
 text {
     font-family: sans-serif;
@@ -62,11 +73,11 @@ text {
   }
   
 .button {
-    width: 75px;
+    width: 100px;
     height: 25px;
-    position: relative; 
+    /* position: ;  */
     margin: 2.5px;
-    float:left;
+    /* float:left; */
     bottom: 700px;
     left: 20px;
 }
@@ -75,5 +86,5 @@ text {
     position: absolute;
     visibility: hidden;
     left: 705px;
-    top: 5px;
+    top: 150px;
 }
